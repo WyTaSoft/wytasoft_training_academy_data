@@ -1,3 +1,7 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+from pyspark.sql.functions import when, col, lit
+
 # Données de transactions
 transactions = [
  {"id": 1, "montant": 500, "carte": "crédit", "pays": "US", "heure": "10:00"},
@@ -15,3 +19,12 @@ facteurs_risque = {
  "IN": {"risque": 2.0},
  "FR": {"risque": 1.0}
 }
+
+# Define the schema for the transactions
+transaction_schema = StructType([
+    StructField("id", IntegerType(), True),
+    StructField("montant", IntegerType(), True),
+    StructField("carte", StringType(), True),
+    StructField("pays", StringType(), True),
+    StructField("heure", StringType(), True)
+])
