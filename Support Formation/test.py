@@ -1,7 +1,11 @@
-
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
-from pyspark.sql.functions import when, col, lit
+
+# Correcting the SparkSession instantiation
+spark = SparkSession.builder \
+    .appName("Transaction Analysis") \
+    .getOrCreate()
+
 # Données de transactions
 transactions = [
     {"id": 1, "montant": 500, "carte": "crédit", "pays": "US", "heure": "10:00"},
@@ -10,6 +14,7 @@ transactions = [
     {"id": 4, "montant": 300, "carte": "débit", "pays": "US", "heure": "09:45"}
 ]
 
+# Defining the schema for the DataFrame
 transaction_schema = StructType([
     StructField("id", IntegerType(), True),
     StructField("montant", IntegerType(), True),
@@ -18,4 +23,8 @@ transaction_schema = StructType([
     StructField("heure", StringType(), True)
 ])
 
+# Creating the DataFrame with Spark
 transactions_df = spark.createDataFrame(transactions, schema=transaction_schema)
+
+# Show the DataFrame
+transactions_df.show()
