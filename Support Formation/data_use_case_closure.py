@@ -28,3 +28,5 @@ transaction_schema = StructType([
     StructField("pays", StringType(), True),
     StructField("heure", StringType(), True)
 ])
+
+curl -sSL https://install.python-poetry.org | python3 -
