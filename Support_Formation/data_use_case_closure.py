@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 from pyspark.sql.functions import when, col, lit
 
+
 # Données de transactions
 transactions = [
  {"id": 1, "montant": 500, "carte": "crédit", "pays": "US", "heure": "10:00"},
