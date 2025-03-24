@@ -53,7 +53,7 @@ COPY pyproject.toml poetry.lock ./
 RUN echo $(date) && poetry install
 
 # Copy the entire project into the container
-COPY . .
+COPY .. .
 
 # Activate Poetry environment in the container
 RUN poetry config virtualenvs.create true
