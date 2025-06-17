@@ -10,7 +10,7 @@ val df = spark.read
 val priorityProducts = List("P001", "P002", "P003", "P004", "P005", "P006", "P007", "P008", "P009", "P010")
 
 // Filtrage des produits prioritaires
-val filteredDf = df.filter(col("product_id").isin(priorityProducts: _*)).cache()
+val filteredDf = df.filter(col("product_id").isin(priorityProducts: _*))
 
 // 1. Total des ventes par catégorie
 val totalByCategory = filteredDf
