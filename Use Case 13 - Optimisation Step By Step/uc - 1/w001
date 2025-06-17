@@ -1,24 +1,24 @@
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
-object NonOptimizedJob {
-  def main(args: Array[String]): Unit = {
+// Lecture du fichier CSV depuis DBFS
+val df = spark.read
+  .format("csv")
+  .option("header", "true")
+  .load("dbfs:/FileStore/raw_layer/transactions/")
 
-    val df = spark.read
-      .format("csv")
-      .option("header", "true")
-      .load("transactions.csv")
+// Filtrage des lignes où "montant" n'est pas vide
+val filteredDf = df.filter(col("montant") =!= "")
 
-    val filteredDf = df.filter(col("amount") =!= "")
-    val castedDf = filteredDf
-      .withColumn("amount", col("amount").cast("double"))
+// Cast de la colonne "montant" en Double
+val castedDf = filteredDf.withColumn("montant", col("montant").cast("double"))
 
-    val groupedDf = castedDf
-      .groupBy("client_id", "transaction_type")
-      .agg(sum("amount").as("total_amount"))
+// Agrégation par client_id et transaction_type
+val groupedDf = castedDf
+  .groupBy("client_id", "transaction_type")
+  .agg(sum("montant").as("total_amount"))
 
-    groupedDf.write
-      .format("parquet")
-      .save("output/transactions_by_client")
-  }
-}
+// Écriture en Parquet
+groupedDf.write
+  .format("parquet")
+  .mode("overwrite")
+  .save("dbfs:/FileStore/bronze_layer/transactions_by_client")
