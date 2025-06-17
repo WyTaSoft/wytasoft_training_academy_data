@@ -1,0 +1,55 @@
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+
+object NonOptimizedFraudJob {
+  def main(args: Array[String]): Unit = {
+
+    import spark.implicits._
+
+    val df = spark.read
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .csv("transactions.csv")
+      .withColumn("timestamp", $"timestamp".cast("timestamp"))
+
+    // Règle 1 : cumul retraits 7 jours
+    val retraitDf = df.filter($"transaction_type" === "retrait")
+
+    val retraitWithWindow = retraitDf.withColumn("window_7d", window($"timestamp", "7 days"))
+    val rule1 = retraitWithWindow.groupBy("client_id", "window_7d")
+      .agg(sum("amount").as("total_retrait"))
+      .filter($"total_retrait" > 10000)
+
+    // Règle 2 : transactions à l’étranger > 5 en 3 jours
+    val foreignDf = df.filter($"country" =!= "FR")
+    val foreignWithWindow = foreignDf.withColumn("window_3d", window($"timestamp", "3 days"))
+    val rule2 = foreignWithWindow.groupBy("client_id", "window_3d")
+      .agg(count("*").as("nb_tx"))
+      .filter($"nb_tx" > 5)
+
+    // Règle 3 : déplacement > 1000 km en < 2h
+    val rule3 = df.as("a").join(df.as("b"), $"a.client_id" === $"b.client_id")
+      .filter($"a.timestamp" < $"b.timestamp")
+      .filter(unix_timestamp($"b.timestamp") - unix_timestamp($"a.timestamp") < 7200)
+      .withColumn("distance", haversine($"a.latitude", $"a.longitude", $"b.latitude", $"b.longitude"))
+      .filter($"distance" > 1000)
+
+    // Fusion des règles
+    val suspects = rule1.select("client_id")
+      .union(rule2.select("client_id"))
+      .union(rule3.select("a.client_id".as("client_id")))
+      .distinct()
+
+    suspects.write.mode("overwrite").csv("output/suspects")
+  }
+
+  def haversine(lat1: Column, lon1: Column, lat2: Column, lon2: Column): Column = {
+    val R = 6371.0 // Rayon de la Terre
+    val dLat = radians(lat2 - lat1)
+    val dLon = radians(lon2 - lon1)
+    val a = pow(sin(dLat / 2), 2) +
+            cos(radians(lat1)) * cos(radians(lat2)) * pow(sin(dLon / 2), 2)
+    val c = atan2(sqrt(a), sqrt(-a + 1)) * 2
+    lit(R) * c
+  }
+}
