@@ -1,38 +1,29 @@
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
-object NonOptimizedProductAnalysis {
-  def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder()
-      .appName("ProductAnalysis")
-      .getOrCreate()
+// Chargement du fichier de ventes
+val df = spark.read
+  .option("header", "true")
+  .option("inferSchema", "true")
+  .csv("dbfs:/FileStore/raw_layer/w003/sales/")
 
-    import spark.implicits._
+// Liste des produits prioritaires
+val priorityProducts = List("P001", "P002", "P003", "P004", "P005", "P006", "P007", "P008", "P009", "P010")
 
-    val df = spark.read
-      .option("header", "true")
-      .option("inferSchema", "true")
-      .csv("sales.csv")
+// Filtrage des produits prioritaires
+val filteredDf = df.filter(col("product_id").isin(priorityProducts: _*)).cache()
 
-    // Liste des produits prioritaires (hardcodée, non broadcastée)
-    val priorityProducts = List("P001", "P002", "P003", "P004", "P005", "P006", "P007", "P008", "P009", "P010")
+// 1. Total des ventes par catégorie
+val totalByCategory = filteredDf
+  .groupBy("category")
+  .agg(sum("amount").alias("total_sales"))
 
-    // Filtrage (chaque réutilisation de cette ligne relance tout)
-    val filteredDf = df.filter($"product_id".isin(priorityProducts: _*))
+// 2. Top 5 clients par ventes
+val topClients = filteredDf
+  .groupBy("client_id")
+  .agg(sum("amount").alias("total_client_sales"))
+  .orderBy(desc("total_client_sales"))
+  .limit(5)
 
-    // Première utilisation : total par catégorie
-    val totalByCategory = filteredDf
-      .groupBy("category")
-      .agg(sum("amount").as("total_sales"))
-
-    // Deuxième utilisation : top 5 clients
-    val topClients = filteredDf
-      .groupBy("client_id")
-      .agg(sum("amount").as("total_client_sales"))
-      .orderBy(desc("total_client_sales"))
-      .limit(5)
-
-    totalByCategory.show()
-    topClients.show()
-  }
-}
+// Affichage des résultats
+display(totalByCategory)
+display(topClients)

@@ -1,0 +1,32 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, sum, desc
+
+# Création de la session Spark si nécessaire
+spark = SparkSession.builder.getOrCreate()
+
+# Chargement du fichier de ventes
+df = spark.read \
+    .option("header", "true") \
+    .option("inferSchema", "true") \
+    .csv("dbfs:/FileStore/raw_layer/w003/sales/")
+
+# Liste des produits prioritaires
+priorityProducts = ["P001", "P002", "P003", "P004", "P005",
+                    "P006", "P007", "P008", "P009", "P010"]
+
+# Filtrage des produits prioritaires
+filteredDf = df.filter(col("product_id").isin(priorityProducts)).cache()
+
+# 1. Total des ventes par catégorie
+totalByCategory = filteredDf.groupBy("category") \
+    .agg(sum("amount").alias("total_sales"))
+
+# 2. Top 5 clients par ventes
+topClients = filteredDf.groupBy("client_id") \
+    .agg(sum("amount").alias("total_client_sales")) \
+    .orderBy(desc("total_client_sales")) \
+    .limit(5)
+
+# Affichage des résultats
+totalByCategory.show()
+topClients.show()
