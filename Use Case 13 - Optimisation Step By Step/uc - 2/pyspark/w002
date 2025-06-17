@@ -1,6 +1,5 @@
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
-from pyspark.sql.types import Column
 
 # Lecture du fichier CSV avec inférence de schéma
 df = spark.read \
