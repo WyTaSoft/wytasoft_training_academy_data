@@ -1,6 +1,6 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
-
+import org.apache.spark.sql.Column
 object NonOptimizedFraudJob {
 
   def main(args: Array[String]): Unit = {
@@ -14,7 +14,7 @@ object NonOptimizedFraudJob {
     val df = spark.read
       .option("header", "true")
       .option("inferSchema", "true")
-      .csv("transactions.csv")
+      .csv("/FileStore/tables/transactions-10.csv")
       .withColumn("timestamp", $"timestamp".cast("timestamp"))
 
     // -----------------------------------------------------
@@ -89,7 +89,8 @@ object NonOptimizedFraudJob {
         cos(radians(lat1)) * cos(radians(lat2)) *
           pow(sin(dLon / 2), 2)
 
-    val c = atan2(sqrt(a), sqrt(1 - a)) * 2
+    val c = atan2(sqrt(a), sqrt(lit(1) - a)) * 2
+
     lit(R) * c
   }
 }
