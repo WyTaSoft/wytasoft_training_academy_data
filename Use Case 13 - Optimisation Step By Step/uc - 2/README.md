@@ -21,8 +21,7 @@ Starter code: [`pyspark/w002.py`](./pyspark/w002.py) (Scala: [`scala/w002.scala`
   so the read + parse runs from scratch for each rule (and again for the final write).
 - **An expensive self-join.** Rule 3 self-joins the transactions on `client_id` with a time
   predicate to compare every pair of transactions — an `O(n²)`-per-client blow-up and a large
-  shuffle. (It also references `a.lat` / `b.lat` while the columns are actually `latitude` /
-  `longitude` — fix that too.)
+  shuffle.
 
 ## Your mission
 
@@ -65,12 +64,7 @@ and time. Compute the haversine distance to the previous point and the seconds e
 where elapsed < 7200 and distance > 1000.
 </details>
 
-<details><summary>Hint 3 — fix the column names</summary>
-
-The starter uses `a.lat` / `a.lon`; the data has `latitude` / `longitude`.
-</details>
-
-<details><summary>Hint 4 — unpersist</summary>
+<details><summary>Hint 3 — unpersist</summary>
 
 Release the cache once the suspects are written.
 </details>

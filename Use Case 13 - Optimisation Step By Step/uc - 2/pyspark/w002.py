@@ -40,15 +40,15 @@ joined = (
         "distance",
         lit(6371.0) * lit(2) * atan2(
             sqrt(
-                pow(sin(radians(col("b.lat") - col("a.lat")) / 2), 2) +
-                cos(radians(col("a.lat"))) * cos(radians(col("b.lat"))) *
-                pow(sin(radians(col("b.lon") - col("a.lon")) / 2), 2)
+                pow(sin(radians(col("b.latitude") - col("a.latitude")) / 2), 2) +
+                cos(radians(col("a.latitude"))) * cos(radians(col("b.latitude"))) *
+                pow(sin(radians(col("b.longitude") - col("a.longitude")) / 2), 2)
             ),
             sqrt(
                 1 - (
-                        pow(sin(radians(col("b.lat") - col("a.lat")) / 2), 2) +
-                        cos(radians(col("a.lat"))) * cos(radians(col("b.lat"))) *
-                        pow(sin(radians(col("b.lon") - col("a.lon")) / 2), 2)
+                        pow(sin(radians(col("b.latitude") - col("a.latitude")) / 2), 2) +
+                        cos(radians(col("a.latitude"))) * cos(radians(col("b.latitude"))) *
+                        pow(sin(radians(col("b.longitude") - col("a.longitude")) / 2), 2)
                 )
             )
         )

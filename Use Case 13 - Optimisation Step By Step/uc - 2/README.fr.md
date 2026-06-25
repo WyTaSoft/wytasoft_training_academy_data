@@ -22,8 +22,7 @@ Code de départ : [`pyspark/w002.py`](./pyspark/w002.py) (Scala : [`scala/w002.s
   l'écriture finale).
 - **Une self-join coûteuse.** La règle 3 joint les transactions sur `client_id` avec un prédicat
   temporel pour comparer chaque paire de transactions — une explosion en `O(n²)` par client et un
-  gros shuffle. (Elle référence aussi `a.lat` / `b.lat` alors que les colonnes sont `latitude` /
-  `longitude` — à corriger également.)
+  gros shuffle.
 
 ## Votre mission
 
@@ -68,12 +67,7 @@ l'heure précédentes. Calculez la distance haversine au point précédent et le
 signalez les lignes où l'écart < 7200 et la distance > 1000.
 </details>
 
-<details><summary>Indice 3 — corriger les noms de colonnes</summary>
-
-Le code de départ utilise `a.lat` / `a.lon` ; les données ont `latitude` / `longitude`.
-</details>
-
-<details><summary>Indice 4 — unpersist</summary>
+<details><summary>Indice 3 — unpersist</summary>
 
 Libérez le cache une fois les suspects écrits.
 </details>
